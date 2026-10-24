@@ -1,6 +1,6 @@
 ## Documentation
 
-- [System & AI Agent Workflow](docs/WORKFLOW.md)
+- [System & AI Agent Workflow](WORKFLOW.md)
 
 ## System Overview
 
