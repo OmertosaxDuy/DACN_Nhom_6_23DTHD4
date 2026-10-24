@@ -2,18 +2,18 @@
 
 ## 1. Workflow tổng quan
 
-Hệ thống hoạt động theo vòng lặp Adaptive Cyber Deception:
+Hệ thống hướng tới kiến trúc **AI-driven Adaptive Cyber Deception**, trong đó attacker đi qua lớp AI Deception Agent trước khi được điều phối tới Honeypot hoặc các decoy service.
 
-```text
-Observe → Analyze → Decide → Act → Adapt → Observe Again
-```
-
-Luồng tổng thể:
+Luồng mục tiêu:
 
 ```text
 Kali Attacker
       ↓
-Cowrie Honeypot / Decoy Services
+AI Deception Agent / Decision Gateway
+      ↓
+Honeypot / Decoy Environment
+      ↓
+Telemetry / Logs
       ↓
 Data Pipeline
       ↓
@@ -21,32 +21,23 @@ SQLite Database
       ↓
 Tool API
       ↓
-Observation Builder
-      ↓
-Derived Facts
-      ↓
-Evidence Fingerprint
-      ↓
-Adaptation State
-      ↓
-Qwen Local LLM
-      ↓
-Deterministic Policy
-      ↓
-Validator
-      ↓
-Controlled Action Executor
-      ↓
-Adaptive Deception Environment
-      ↓
-Observe Again
+Observation / Feedback
+      └──────────────→ AI Deception Agent
+```
+
+Vòng lặp chính:
+
+```text
+Observe → Analyze → Decide → Route/Act → Adapt → Observe Again
 ```
 
 ---
 
 ## 2. Attacker Workflow
 
-Máy Kali được sử dụng để mô phỏng các hành vi attacker như:
+Kali Linux được sử dụng để mô phỏng attacker.
+
+Các hành vi kiểm thử gồm:
 
 - Nmap scan
 - SSH brute force
@@ -54,38 +45,128 @@ Máy Kali được sử dụng để mô phỏng các hành vi attacker như:
 - SSH login
 - Command execution
 - File / configuration discovery
-- HTTP / decoy probing
+- HTTP probing
+- Database probing
+- Redis probing
 - API testing
 
-Ví dụ:
+Luồng mục tiêu:
 
 ```text
-Kali
-  ↓
-SSH :2222
-  ↓
-Cowrie
-  ↓
-Login / Command / Session Events
+Kali Attacker
+      ↓
+AI Decision Gateway
+      ↓
+Deception Strategy
+      ↓
+Cowrie / HTTP Decoy / DB Decoy / Redis Decoy
 ```
 
-Hoặc:
-
-```text
-Kali
-  ↓
-Nmap / Service Probe
-  ↓
-HTTP / Database / Redis Decoy
-  ↓
-Decoy Events
-```
+AI Agent đóng vai trò control layer để lựa chọn hoặc điều chỉnh deception strategy trước và trong quá trình attacker tương tác với môi trường.
 
 ---
 
-## 3. Telemetry Collection
+## 3. AI Deception Agent
 
-Hệ thống thu thập telemetry từ hai nguồn chính.
+AI Agent gồm hai phần chính:
+
+```text
+LLM Reasoning
++
+Deterministic Control
+```
+
+Pipeline nội bộ:
+
+```text
+Observation Builder
+        ↓
+Derived Facts
+        ↓
+Evidence Fingerprint
+        ↓
+Adaptation State
+        ↓
+Qwen Local LLM
+        ↓
+Deterministic Policy
+        ↓
+Validator
+        ↓
+Action Executor
+```
+
+Qwen chịu trách nhiệm:
+
+- Behavior analysis
+- Risk assessment
+- Evidence interpretation
+- Strategy recommendation
+- Artifact selection
+
+Python deterministic layer chịu trách nhiệm:
+
+- Observation building
+- Derived facts
+- Evidence fingerprint
+- Adaptation state
+- Policy enforcement
+- Validation
+- Duplicate protection
+- Controlled execution
+
+---
+
+## 4. Decision Gateway
+
+Trong kiến trúc mục tiêu, AI Agent nằm trước Honeypot / Decoy Environment.
+
+Luồng:
+
+```text
+Attacker Request
+      ↓
+AI observes current state
+      ↓
+AI analyzes attacker context
+      ↓
+Decision / deception strategy
+      ↓
+Route or configure deception environment
+      ↓
+Attacker interaction
+```
+
+Các decision hiện tại:
+
+```text
+observe_only
+increase_monitoring
+update_artifact
+```
+
+Trong hướng phát triển inline gateway có thể bổ sung:
+
+```text
+route_to_decoy
+select_deception_profile
+redirect_service
+```
+
+Các action mới chỉ được triển khai khi có validation và routing layer tương ứng.
+
+---
+
+## 5. Honeypot / Decoy Environment
+
+Môi trường deception hiện gồm:
+
+```text
+Cowrie SSH      : 2222
+HTTP Decoy      : 8080
+Database Decoy  : 3307
+Redis Decoy     : 6380
+```
 
 ### Cowrie
 
@@ -102,34 +183,60 @@ session end
 
 ### Decoy Services
 
-Các service giả lập hiện tại:
+Các decoy service ghi nhận:
 
 ```text
-Cowrie SSH      : 2222
-HTTP Decoy      : 8080
-Database Decoy  : 3307
-Redis Decoy     : 6380
+service probing
+protocol interaction
+HTTP request
+database probe
+Redis interaction
+payload preview
 ```
-
-Interaction với các service này được lưu thành `decoy_events`.
 
 ---
 
-## 4. Data Pipeline
+## 6. Telemetry Feedback
 
-Data Pipeline xử lý dữ liệu từ Cowrie và các decoy service.
+Sau khi attacker tương tác với Honeypot hoặc Decoy Environment:
 
 ```text
-Cowrie Logs ─────┐
-                 │
-                 ▼
-            Data Pipeline
-                 │
-                 ▼
-               SQLite
-                 ▲
-                 │
-Decoy Events ────┘
+Honeypot / Decoy
+      ↓
+Telemetry / Logs
+      ↓
+Data Pipeline
+      ↓
+SQLite
+```
+
+Telemetry trở thành feedback cho Agent ở cycle tiếp theo.
+
+---
+
+## 7. Data Pipeline
+
+Data Pipeline chịu trách nhiệm:
+
+- Parse logs
+- Normalize data
+- Extract structured events
+- Store data
+- Maintain attacker interaction history
+
+Luồng:
+
+```text
+Cowrie Logs ───────┐
+                   │
+                   ▼
+              Data Pipeline
+                   │
+                   ▼
+                 SQLite
+                   ▲
+                   │
+Decoy Events ──────┘
 ```
 
 Các bảng chính:
@@ -145,57 +252,51 @@ security_events
 monitoring_state
 ```
 
-Data Pipeline chuẩn hóa telemetry trước khi Agent sử dụng.
-
 ---
 
-## 5. Tool API
+## 8. Tool API
 
-AI Agent không đọc SQLite trực tiếp.
-
-Luồng truy cập:
+Tool API là lớp trung gian giữa persistent state, AI Agent và các environment-changing action.
 
 ```text
 SQLite
    ↓
 Tool API
-   ↓
+   ↕
 AI Agent
 ```
 
-Tool API cung cấp:
+Agent không truy cập trực tiếp SQLite.
 
 ### Read Operations
+
+Tool API cung cấp:
 
 - Session information
 - Recent commands
 - Recent events
 - Login attempts
-- Brute-force status
+- Brute-force state
 - Decoy events
 - Monitoring state
 - Deception history
 
 ### Environment-Changing Actions
 
+Hiện tại:
+
 ```text
 increase_monitoring
 update_artifact
 ```
 
-Ngoài ra Agent có decision:
-
-```text
-observe_only
-```
-
-Decision này không thay đổi môi trường.
+`observe_only` là decision không làm thay đổi môi trường.
 
 ---
 
-## 6. Observation Builder
+## 9. Observation Builder
 
-Mỗi Agent cycle bắt đầu bằng việc lấy dữ liệu qua Tool API.
+Agent xây dựng observation từ Tool API.
 
 Observation gồm:
 
@@ -213,49 +314,13 @@ evidence_fingerprint
 adaptation_state
 ```
 
----
-
-## 7. Monitoring Mode
-
-Hệ thống có hai mức monitoring:
-
-```text
-normal
-enhanced
-```
-
-### Normal
-
-Agent thu thập ít telemetry hơn.
-
-### Enhanced
-
-Agent tăng giới hạn thu thập:
-
-```text
-sessions
-commands
-events
-decoy_events
-```
-
-Luồng:
-
-```text
-normal
-  ↓
-strong malicious evidence
-  ↓
-increase_monitoring
-  ↓
-enhanced
-```
+Observation là context chính để AI Agent ra quyết định.
 
 ---
 
-## 8. Derived Facts
+## 10. Derived Facts
 
-Python tạo deterministic facts từ telemetry trước khi gửi dữ liệu cho LLM.
+Python tạo các fact deterministic từ telemetry.
 
 Ví dụ:
 
@@ -283,7 +348,7 @@ cat /etc/mysql/my.cnf
 attacker_commands_observed = true
 ```
 
-Derived facts hiện gồm:
+Các fact hiện tại gồm:
 
 ```text
 bruteforce_detected
@@ -299,9 +364,9 @@ recent_attacker_commands
 
 ---
 
-## 9. Evidence Fingerprint
+## 11. Evidence Fingerprint
 
-`derived_facts` được chuẩn hóa và hash thành evidence fingerprint.
+`derived_facts` được chuẩn hóa và hash bằng SHA-256.
 
 ```text
 Derived Facts
@@ -313,7 +378,7 @@ SHA-256
 Evidence Fingerprint
 ```
 
-Fingerprint dùng để phân biệt:
+Fingerprint giúp phân biệt:
 
 ```text
 same evidence
@@ -325,13 +390,11 @@ và:
 new evidence
 ```
 
-Nếu attacker tạo hành vi mới, derived facts thay đổi và fingerprint mới được sinh.
-
 ---
 
-## 10. Adaptation State
+## 12. Adaptation State
 
-Agent kiểm tra deception history để xác định evidence hiện tại đã từng được xử lý hay chưa.
+Agent kết hợp evidence fingerprint với deception history.
 
 ```text
 Evidence Fingerprint
@@ -347,33 +410,25 @@ Kết quả:
 same_evidence_already_adapted = true / false
 ```
 
-Nếu cùng fingerprint đã từng kích hoạt deception adaptation:
+Nếu evidence đã được xử lý:
 
 ```text
-same_evidence_already_adapted = true
+true
 ```
 
-Nếu đây là evidence mới:
+Nếu attacker tạo trạng thái evidence mới:
 
 ```text
-same_evidence_already_adapted = false
+false
 ```
 
 ---
 
-## 11. Qwen Analysis
+## 13. Qwen Analysis
 
 Observation được gửi tới Qwen Local LLM thông qua Ollama.
 
-Qwen chịu trách nhiệm:
-
-- Behavior analysis
-- Risk assessment
-- Evidence interpretation
-- Strategy recommendation
-- Artifact selection
-
-Qwen trả về structured decision.
+Qwen trả về structured proposal.
 
 Ví dụ:
 
@@ -391,15 +446,15 @@ Ví dụ:
 }
 ```
 
-LLM không trực tiếp thực thi action.
+Qwen không trực tiếp thực thi action.
 
 ---
 
-## 12. Deterministic Policy
+## 14. Deterministic Policy
 
-Sau khi Qwen trả proposal, Python kiểm tra monitoring state và adaptation state.
+Sau LLM proposal, Python kiểm tra monitoring state và adaptation state.
 
-Logic chính:
+Logic hiện tại:
 
 ```text
 NORMAL MONITORING
@@ -426,40 +481,34 @@ ENHANCED MONITORING
             QWEN ANALYSIS
 ```
 
-Policy có thể override đề xuất của Qwen.
-
-Ví dụ:
+Qwen có thể đề xuất:
 
 ```text
-Qwen:
-update_artifact
-
-Adaptation State:
-same_evidence_already_adapted = true
-
-Final Decision:
 observe_only
+```
+
+hoặc:
+
+```text
+update_artifact
 ```
 
 ---
 
-## 13. Validator
+## 15. Validator
 
-Decision sau policy phải qua validator.
+Decision phải qua validator trước khi thực thi.
 
 Validator kiểm tra:
 
-```text
-allowed risk level
-allowed action
-evidence format
-parameter shape
-artifact whitelist
-monitoring state
-action compatibility
-```
+- Allowed action
+- Allowed artifact
+- Required evidence
+- Parameter shape
+- Monitoring state
+- Action compatibility
 
-Allowed decisions:
+Allowed decision space:
 
 ```text
 observe_only
@@ -467,29 +516,19 @@ increase_monitoring
 update_artifact
 ```
 
-Allowed artifacts:
-
-```text
-backup_credentials
-db_config
-cloud_keys
-```
-
 ---
 
-## 14. Controlled Action Executor
+## 16. Action Executor
 
-Chỉ decision hợp lệ mới được thực thi.
-
-### observe_only
+### Observe Only
 
 ```text
-No environment-changing action
+observe_only
 ```
 
-Agent tiếp tục quan sát.
+Không thay đổi environment.
 
-### increase_monitoring
+### Increase Monitoring
 
 ```text
 normal
@@ -497,9 +536,11 @@ normal
 enhanced
 ```
 
-### update_artifact
+Enhanced monitoring thu thập nhiều telemetry hơn.
 
-Agent gửi tới Tool API:
+### Update Artifact
+
+Agent gửi:
 
 ```text
 session_id
@@ -508,13 +549,13 @@ controlled content
 evidence_fingerprint
 ```
 
+đến Tool API.
+
 ---
 
-## 15. Adaptive Artifact Workflow
+## 17. Adaptive Artifacts
 
-LLM chỉ chọn loại artifact.
-
-Các artifact được whitelist:
+Các artifact hiện được whitelist:
 
 ```text
 backup_credentials
@@ -530,7 +571,7 @@ Database discovery
 ```
 
 ```text
-Cloud / AWS credential discovery
+Cloud / AWS discovery
 → prefer cloud_keys
 ```
 
@@ -539,41 +580,25 @@ Credential / backup discovery
 → prefer backup_credentials
 ```
 
-Nội dung deception artifact được Python tạo từ controlled template.
+Qwen chỉ chọn artifact.
 
-```text
-Qwen
- ↓
-artifact_name
- ↓
-Python Template Generator
- ↓
-Fake Deception Content
- ↓
-Tool API
- ↓
-Adaptive Artifact
-```
+Nội dung deception được Python tạo từ controlled template.
 
 ---
 
-## 16. Duplicate Protection
+## 18. Duplicate Protection
 
-Hệ thống có hai lớp chống duplicate.
-
-### Agent Layer
+Agent layer:
 
 ```text
-enhanced monitoring
+enhanced
 +
 same_evidence_already_adapted = true
 ↓
 observe_only
 ```
 
-### Tool API Layer
-
-Tool API kiểm tra:
+Tool API layer kiểm tra:
 
 ```text
 session_id
@@ -581,189 +606,93 @@ artifact_name
 evidence_fingerprint
 ```
 
-Nếu cùng action đã tồn tại:
+Nếu đã tồn tại:
 
 ```text
-status = already_applied
-```
-
-và không ghi thêm deception event trùng.
-
----
-
-## 17. Main Adaptive Scenarios
-
-### Scenario 1
-
-```text
-Normal monitoring
-+
-strong malicious evidence
-↓
-increase_monitoring
-```
-
-### Scenario 2
-
-```text
-Enhanced monitoring
-+
-same evidence already adapted
-↓
-observe_only
-```
-
-### Scenario 3
-
-```text
-Enhanced monitoring
-+
-new evidence
-↓
-Qwen analysis
-↓
-observe_only hoặc update_artifact
-```
-
-Trong database discovery scenario đã kiểm thử:
-
-```text
-cat /etc/mysql/my.cnf
-find / -iname "*mysql*"
-        ↓
-new evidence fingerprint
-        ↓
-Qwen analysis
-        ↓
-update_artifact
-        ↓
-db_config
+already_applied
 ```
 
 ---
 
-## 18. Full Workflow
+## 19. Full Adaptive Workflow
 
 ```text
-ATTACKER
-   ↓
-Kali
-   ↓
-Cowrie / Decoy Services
-   ↓
-Telemetry
-   ↓
-Data Pipeline
-   ↓
-SQLite
-   ↓
-Tool API
-   ↓
-Observation Builder
-   ↓
-Derived Facts
-   ↓
-Evidence Fingerprint
-   ↓
-Adaptation State
-   ↓
-Qwen Local LLM
-   ↓
-Structured Proposal
-   ↓
-Deterministic Policy
-   ↓
-Validator
-   ↓
-Controlled Action Executor
-   ↓
-Tool API
-   ↓
-Monitoring / Deception Environment Updated
-   ↓
-New Attacker Interaction
-   ↓
+KALI ATTACKER
+      ↓
+AI DECEPTION AGENT / DECISION GATEWAY
+      ↓
+DECEPTION STRATEGY
+      ↓
+HONEYPOT / DECOY ENVIRONMENT
+      ↓
+ATTACKER INTERACTION
+      ↓
+TELEMETRY / LOGS
+      ↓
+DATA PIPELINE
+      ↓
+SQLITE
+      ↓
+TOOL API
+      ↓
+OBSERVATION / FEEDBACK
+      ↓
+AI AGENT
+      ↓
+NEXT DECEPTION DECISION
+      ↓
+HONEYPOT / DECOY ENVIRONMENT
+      ↓
 OBSERVE AGAIN
 ```
 
 ---
 
-## 19. State Transition
+## 20. Current Prototype vs Target Architecture
+
+### Current Prototype
+
+Phiên bản hiện tại đã triển khai:
 
 ```text
-              ┌─────────────────────┐
-              │  NORMAL MONITORING  │
-              └──────────┬──────────┘
-                         │
-               strong malicious evidence
-                         │
-                         ▼
-              ┌─────────────────────┐
-              │ INCREASE MONITORING │
-              └──────────┬──────────┘
-                         │
-                         ▼
-              ┌─────────────────────┐
-              │ ENHANCED MONITORING │
-              └──────────┬──────────┘
-                         │
-              ┌──────────┴───────────┐
-              │                      │
-      Same evidence             New evidence
-      already adapted                │
-              │                      ▼
-              ▼                QWEN ANALYSIS
-     ┌────────────────┐              │
-     │  OBSERVE ONLY  │       ┌──────┴──────┐
-     └────────────────┘       │             │
-                              ▼             ▼
-                       OBSERVE ONLY   UPDATE ARTIFACT
-                                           │
-                                           ▼
-                                  ENVIRONMENT ADAPTS
-                                           │
-                                           ▼
-                                      OBSERVE AGAIN
+Attacker
+   ↓
+Cowrie / Decoy
+   ↓
+Telemetry
+   ↓
+AI Agent
+   ↓
+Adaptive Action
+   ↓
+Environment Updated
 ```
 
----
+Đã hoạt động:
 
-## 20. Design Principle
+- observation
+- derived facts
+- evidence fingerprint
+- adaptation state
+- Qwen reasoning
+- deterministic policy
+- validator
+- increase monitoring
+- update artifact
+- duplicate protection
 
-Hệ thống không sử dụng:
+### Target Architecture
+
+Mục tiêu tiếp theo:
 
 ```text
-LLM → unrestricted command execution
+Attacker
+   ↓
+AI Decision Gateway
+   ↓
+Honeypot / Decoy Environment
 ```
 
-Mà sử dụng:
+Tức mọi attacker interaction sẽ được AI deception control layer điều phối trước khi đi vào environment.
 
-```text
-LLM
- ↓
-Structured Recommendation
- ↓
-Deterministic Policy
- ↓
-Validation
- ↓
-Whitelisted Action
- ↓
-Controlled Environment Change
-```
-
-Thiết kế này kết hợp:
-
-```text
-LLM flexibility
-+
-deterministic control
-+
-evidence-aware adaptation
-+
-restricted action space
-+
-observable state transitions
-```
-
-Mục tiêu là xây dựng AI Agent hỗ trợ Adaptive Cyber Deception nhưng vẫn đảm bảo tính kiểm soát, khả năng giải thích và khả năng kiểm thử trong môi trường lab.
+Đây là bước phát triển tiếp theo để chuyển prototype hiện tại thành inline adaptive deception architecture.
