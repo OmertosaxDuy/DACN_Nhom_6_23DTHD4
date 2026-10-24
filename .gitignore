@@ -1,66 +1,98 @@
+# =========================
 # Python
+# =========================
+
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 
-# Virtual environment
+# Virtual environments
 .venv/
 venv/
 env/
 
-# Environment variables / secrets
-.env
-.env.*
-!.env.example
-
-# Logs
-*.log
-logs/
-cowrie/log/
-cowrie/var/log/
-
-# Runtime / temporary files
-*.pid
-*.tmp
-*.swp
-*.swo
-.DS_Store
-
-# SQLite databases
-*.db
-*.sqlite
-*.sqlite3
-
-# Cowrie runtime data
-cowrie/var/lib/cowrie/
-cowrie/var/run/
-cowrie/var/log/
-
-# Generated deception artifacts
-*.generated
-generated/
-artifacts/runtime/
-
-# Python tooling
+# Python tooling / cache
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
+coverage.xml
 htmlcov/
 
-# IDE
-.vscode/
-.idea/
+# =========================
+# Environment / Secrets
+# =========================
 
-# OS files
-Thumbs.db
+.env
+.env.*
+!.env.example
 
-# Docker override / local config
-docker-compose.override.yml
+secrets/
 
-# Secrets / keys
 *.pem
 *.key
 *.crt
-secrets/
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+cowrie/log/
+cowrie/var/log/
+
+# =========================
+# Runtime / Temporary files
+# =========================
+
+*.pid
+*.tmp
+*.swp
+*.swo
+
+# =========================
+# SQLite Databases
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Cowrie Runtime Data
+# =========================
+
+cowrie/var/lib/cowrie/
+cowrie/var/run/
+cowrie/var/log/
+
+# =========================
+# Generated Deception Artifacts
+# =========================
+
+*.generated
+generated/
+artifacts/runtime/
+
+# =========================
+# IDE
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# OS files
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# Docker local overrides
+# =========================
+
+docker-compose.override.yml
