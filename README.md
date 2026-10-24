@@ -39,6 +39,8 @@ Derived Facts
       ↓
 Evidence Fingerprint
       ↓
+Adaptation State
+      ↓
 Qwen Local LLM
       ↓
 Policy + Validator
@@ -46,11 +48,13 @@ Policy + Validator
 Action Executor
       ↓
 Adaptive Deception Environment
+      ↓
+Observe Again
 ```
 
 ## Adaptive Actions
 
-Hệ thống hiện hỗ trợ ba action chính:
+Hệ thống hiện hỗ trợ ba decision/action chính:
 
 ```text
 observe_only
@@ -58,21 +62,34 @@ increase_monitoring
 update_artifact
 ```
 
-Ba nhánh adaptive đã được kiểm thử:
+Trong đó:
+
+- `observe_only`: Agent tiếp tục quan sát và không gọi action endpoint thay đổi môi trường.
+- `increase_monitoring`: tăng monitoring từ normal lên enhanced.
+- `update_artifact`: cập nhật deception artifact được whitelist.
+
+Ba nhánh adaptive chính đã được kiểm thử:
 
 ```text
-Normal monitoring + malicious evidence
+Normal monitoring + strong malicious evidence
 → increase_monitoring
 ```
 
 ```text
-Enhanced monitoring + same evidence
+Enhanced monitoring + same evidence already adapted
 → observe_only
 ```
 
 ```text
 Enhanced monitoring + new evidence
-→ update_artifact
+→ Qwen analysis
+→ update_artifact hoặc observe_only
+```
+
+Trong kịch bản database discovery đã kiểm thử, Qwen chọn:
+
+```text
+update_artifact → db_config
 ```
 
 ## Technologies
@@ -106,6 +123,8 @@ cyper_deception_agent/
 ├── docker-compose.yml
 ├── TOOL_API.md
 ├── WORKFLOW.md
+├── ARCHITECTURE.md
+├── DEMO.md
 └── README.md
 ```
 
@@ -115,29 +134,101 @@ Các thành phần lõi đã hoạt động:
 
 - Cowrie ghi nhận login, session và command.
 - Decoy services ghi nhận reconnaissance và probing.
-- Data Pipeline lưu dữ liệu vào SQLite.
-- Tool API cung cấp read/action tools.
-- Local Qwen thực hiện phân tích hành vi.
-- Hybrid policy kiểm soát action.
-- Evidence fingerprint ngăn adaptation trùng lặp.
-- Agent có thể tăng monitoring hoặc thay đổi deception artifact theo hành vi mới.
+- Data Pipeline xử lý và lưu dữ liệu vào SQLite.
+- Tool API cung cấp dữ liệu và controlled action endpoints.
+- Observation Builder tổng hợp trạng thái hệ thống.
+- Python tạo derived facts từ telemetry.
+- Evidence fingerprint giúp nhận biết trạng thái evidence mới hoặc đã từng xử lý.
+- Adaptation state kiểm tra lịch sử deception.
+- Local Qwen thực hiện phân tích hành vi và đề xuất strategy.
+- Deterministic policy có thể override quyết định của LLM khi cần.
+- Validator kiểm tra action và parameters trước khi thực thi.
+- Action Executor chỉ cho phép các action đã được kiểm soát.
+- Tool API có duplicate protection cho deception artifact update.
+- Agent có thể tăng monitoring hoặc thay đổi deception artifact theo trạng thái attacker.
+
+## Adaptive Decision Flow
+
+```text
+NORMAL MONITORING
+       │
+       │ strong malicious evidence
+       ▼
+INCREASE MONITORING
+       │
+       ▼
+ENHANCED MONITORING
+       │
+       ├── same evidence already adapted
+       │          ↓
+       │     OBSERVE ONLY
+       │
+       └── new evidence
+                  ↓
+            QWEN ANALYSIS
+                  ↓
+        ┌─────────┴─────────┐
+        │                   │
+        ▼                   ▼
+  OBSERVE ONLY       UPDATE ARTIFACT
+                            │
+                            ▼
+                    ENVIRONMENT ADAPTS
+                            │
+                            ▼
+                       OBSERVE AGAIN
+```
 
 ## Safety Design
 
 LLM không được phép thực thi shell command tự do hoặc sửa trực tiếp hệ thống.
 
-Luồng action luôn đi qua:
+LLM chỉ tạo structured proposal. Decision cuối cùng phải đi qua các lớp kiểm soát:
 
 ```text
 LLM Proposal
     ↓
 Deterministic Policy
     ↓
-Validation
+Schema / Safety Validation
     ↓
-Whitelisted Action
+Controlled Action Executor
     ↓
 Tool API
 ```
 
-Mục tiêu của thiết kế là giữ AI Agent linh hoạt trong phân tích nhưng vẫn kiểm soát được hành động trong môi trường lab.
+Các deception artifact hiện được whitelist:
+
+```text
+backup_credentials
+db_config
+cloud_keys
+```
+
+LLM chỉ lựa chọn loại artifact phù hợp với hành vi quan sát được. Nội dung artifact được Python tạo từ controlled template.
+
+## Design Principle
+
+Hệ thống không sử dụng mô hình:
+
+```text
+LLM → unrestricted command execution
+```
+
+Mà sử dụng:
+
+```text
+LLM
+ ↓
+Recommendation
+ ↓
+Deterministic Control
+ ↓
+Validation
+ ↓
+Whitelisted Tool
+ ↓
+Controlled Environment Change
+```
+
+Mục tiêu của thiết kế là tận dụng khả năng phân tích linh hoạt của Local LLM nhưng vẫn giữ các hành động deception trong phạm vi kiểm soát, có thể giải thích và tái hiện trong môi trường lab.
