@@ -91,6 +91,7 @@ Enhanced monitoring + new evidence
 
 - [System & AI Agent Workflow](WORKFLOW.md)
 - [System Architecture](ARCHITECTURE.md)
+- [Demo Scenarios](DEMO.md)
 
 ## Project Structure
 
