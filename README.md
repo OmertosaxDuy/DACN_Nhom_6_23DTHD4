@@ -13,4 +13,4 @@ Core loop:
 
 For the complete system and AI Agent workflow, see:
 
-[docs/WORKFLOW.md](docs/WORKFLOW.md)
+[docs/WORKFLOW.md](WORKFLOW.md)
