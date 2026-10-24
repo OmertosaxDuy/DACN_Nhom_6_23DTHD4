@@ -19,6 +19,12 @@ Trong đó:
 - Policy layer và validator kiểm soát quyết định của LLM.
 - Action Executor chỉ thực thi các action được whitelist.
 - Tool API chịu trách nhiệm thay đổi monitoring state hoặc deception artifact.
+## Team Members
+
+- Lê Duy
+- Lê Phi Hoàng
+- Phạm Nhật Huy
+
 
 ## Core Architecture
 
