@@ -2,15 +2,11 @@
 
 - [System & AI Agent Workflow](WORKFLOW.md)
 
-## System Overview
+## Project Overview
 
-This project implements an adaptive Cyber Deception system based on
-Cowrie Honeypot, decoy services, Tool API, and a local Hybrid AI Agent.
+Hệ thống xây dựng AI Agent hỗ trợ Adaptive Cyber Deception dựa trên
+Cowrie Honeypot, Decoy Services, Tool API và Local LLM.
 
 Core loop:
 
 `Observe → Analyze → Decide → Act → Adapt → Observe Again`
-
-For the complete system and AI Agent workflow, see:
-
-[docs/WORKFLOW.md](WORKFLOW.md)
