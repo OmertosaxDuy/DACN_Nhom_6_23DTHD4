@@ -90,6 +90,7 @@ Enhanced monitoring + new evidence
 ## Documentation
 
 - [System & AI Agent Workflow](WORKFLOW.md)
+- [System Architecture](ARCHITECTURE.md)
 
 ## Project Structure
 
