@@ -290,6 +290,12 @@ Nội dung artifact được Python tạo từ controlled template.
 
 ---
 
+## Team Members
+
+- Lê Duy
+- Lê Phi Hoàng
+- Phạm Nhật Huy
+
 ## Project Structure
 
 ```text
