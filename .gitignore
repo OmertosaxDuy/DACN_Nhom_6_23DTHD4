@@ -1,1 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+cowrie/log/
+cowrie/var/log/
+
+# Runtime / temporary files
+*.pid
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Cowrie runtime data
+cowrie/var/lib/cowrie/
+cowrie/var/run/
+cowrie/var/log/
+
+# Generated deception artifacts
+*.generated
+generated/
+artifacts/runtime/
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+
+# Docker override / local config
+docker-compose.override.yml
+
+# Secrets / keys
+*.pem
+*.key
+*.crt
+secrets/
