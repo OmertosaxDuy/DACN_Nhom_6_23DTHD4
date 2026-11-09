@@ -4,37 +4,59 @@
 venv/
 env/
 
-# Python cache
+# Python cache and tooling
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 
-# Logs and runtime output
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.crt
+
+# Logs
 *.log
+logs/
 realtime_output.txt
+cowrie/log/
 cowrie/var/
+
+# Runtime files
+*.pid
+*.tmp
+*.swp
+*.swo
+gateway/routing_state.json
 
 # Databases
 *.db
 *.sqlite
 *.sqlite3
 
-# Runtime state
-gateway/routing_state.json
-
-# Secrets
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-
-# Editor / OS
-.vscode/
-.idea/
-.DS_Store
-
-# Runtime deception artifacts
+# Generated deception artifacts
+*.generated
+generated/
+artifacts/runtime/
 cowrie/honeyfs/root/backup_credentials.txt
 cowrie/honeyfs/root/cloud_keys.txt
 cowrie/honeyfs/root/db_config.txt
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker local overrides
+docker-compose.override.yml
