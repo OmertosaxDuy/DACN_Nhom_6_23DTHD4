@@ -1,0 +1,74 @@
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: dacn-cowrie
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./cowrie/honeyfs:/cowrie/cowrie-git/honeyfs
+      - ./cowrie/fs/fs.pickle:/cowrie/cowrie-git/var/lib/cowrie/fs.pickle
+      - cowrie_var:/cowrie/cowrie-git/var
+      - ./cowrie/etc:/cowrie/cowrie-git/etc
+
+    restart: unless-stopped
+
+  data-pipeline:
+    build:
+      context: ./data_pipeline
+    container_name: dacn-data-pipeline
+    volumes:
+      - cowrie_var:/cowrie-data:ro
+      - decoy_logs:/decoy-data:ro     
+      - app_database:/database
+    depends_on:
+      - cowrie
+
+    restart: unless-stopped
+
+  tool-api:
+    build:
+      context: ./tool_api
+    container_name: dacn-tool-api
+    ports:
+      - "8000:8000"
+    environment:
+      TOOL_API_KEY: ${TOOL_API_KEY:?TOOL_API_KEY is required}
+    volumes:
+      - app_database:/database
+      - ./cowrie/honeyfs:/deception/honeyfs
+    depends_on:
+      - data-pipeline
+
+    restart: unless-stopped
+
+  decoy-services:
+    build:
+      context: ./decoy_services
+
+    container_name: dacn-decoy-services
+
+    ports:
+      - "8080:8080"
+      - "3307:3307"
+      - "6380:6380"
+
+    volumes:
+      - decoy_logs:/logs
+
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: ./agent
+
+    container_name: dacn-agent
+
+    environment:
+      TOOL_API_BASE_URL: http://tool-api:8000
+      TOOL_API_KEY: ${TOOL_API_KEY:?TOOL_API_KEY is required}
+    depends_on:
+      - tool-api
+volumes:
+  cowrie_var:
+  app_database:
+  decoy_logs:

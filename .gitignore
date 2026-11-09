@@ -1,0 +1,40 @@
+# Python environments
+.venv/
+.venv-cowrie/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Logs and runtime output
+*.log
+realtime_output.txt
+cowrie/var/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime state
+gateway/routing_state.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Runtime deception artifacts
+cowrie/honeyfs/root/backup_credentials.txt
+cowrie/honeyfs/root/cloud_keys.txt
+cowrie/honeyfs/root/db_config.txt
