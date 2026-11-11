@@ -1,0 +1,11 @@
+mode,run,session_id,ssh_duration_seconds,command_count,manifest_reads
+static,1,e6b7d42e48b5,0.721,2,0
+static,2,56288f69c3ff,0.767,2,0
+static,3,408aab8261c1,0.854,2,0
+static,4,73a6b6cd3c22,0.728,2,0
+static,5,6c3d76bcc4d0,0.709,2,0
+adaptive,1,bb90d0a15578,1.108,3,1
+adaptive,2,5bf7332d7c25,0.978,3,1
+adaptive,3,b9ed5c620fb0,0.992,3,1
+adaptive,4,358d7ede8dc6,1.037,3,1
+adaptive,5,1c975644c230,0.997,3,1

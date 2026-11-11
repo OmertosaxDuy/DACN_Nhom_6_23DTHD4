@@ -1049,6 +1049,7 @@ def validate_decision(
 
 def build_deception_content(
     artifact_name: str,
+    session_id: str,
 ) -> str:
     templates = {
         "backup_credentials": (
@@ -1072,7 +1073,15 @@ def build_deception_content(
         ),
     }
 
-    return templates[artifact_name]
+    content = templates[artifact_name]
+
+    if artifact_name == "backup_credentials":
+        content += (
+            "BACKUP_MANIFEST=/srv/archive/nightly/manifest.txt\n"
+            f"DECEPTION_SESSION={session_id}\n"
+        )
+
+    return content
 
 def execute_decision(
     decision: dict,
@@ -1120,7 +1129,8 @@ def execute_decision(
         artifact_name = params["artifact_name"]
 
         content = build_deception_content(
-            artifact_name
+            artifact_name, 
+            session_id,
         )
        
         evidence_fingerprint = build_evidence_fingerprint(

@@ -1,0 +1,7 @@
+# Nightly Backup Manifest
+BACKUP_ID=nightly-2026-11-12
+BACKUP_STATUS=completed
+BACKUP_SOURCE=customer_portal
+BACKUP_DATABASE=db-prod.internal.local
+BACKUP_CONFIG=/root/db_config.txt
+BACKUP_STORAGE=/srv/archive/nightly
