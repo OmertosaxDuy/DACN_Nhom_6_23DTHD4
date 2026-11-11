@@ -201,11 +201,11 @@ class DecisionAgent:
             
 
 
-            artifact_name = (
-                  decision
-                  .get("action_params", {})
-                  .get("artifact_name")
-            )
+        artifact_name = (
+            decision
+            .get("action_params", {})
+            .get("artifact_name")
+        )
         # =========================
         # Artifact safety policy
         # =========================
